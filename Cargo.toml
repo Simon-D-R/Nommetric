@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = ["core", "ext"]
+default-members = ["core"]
+
+[profile.dev]
+debug = false
+opt-level = 1
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true

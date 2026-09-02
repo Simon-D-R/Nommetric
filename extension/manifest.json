@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Nommetric",
+  "version": "0.1.0",
+  "description": "Personal scores and notes on Deliveroo menu items.",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://deliveroo.be/*",
+        "https://deliveroo.co.uk/*",
+        "https://deliveroo.fr/*",
+        "https://deliveroo.ie/*",
+        "https://deliveroo.it/*",
+        "https://deliveroo.ae/*",
+        "https://deliveroo.hk/*",
+        "https://deliveroo.com.sg/*",
+        "https://deliveroo.com.kw/*",
+        "https://deliveroo.com.qa/*"
+      ],
+      "js": [
+        "boot.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "pkg/*",
+        "selectors.json"
+      ],
+      "matches": [
+        "https://deliveroo.be/*",
+        "https://deliveroo.co.uk/*",
+        "https://deliveroo.fr/*",
+        "https://deliveroo.ie/*",
+        "https://deliveroo.it/*",
+        "https://deliveroo.ae/*",
+        "https://deliveroo.hk/*",
+        "https://deliveroo.com.sg/*",
+        "https://deliveroo.com.kw/*",
+        "https://deliveroo.com.qa/*"
+      ]
+    }
+  ],
+  "options_page": "options.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}
