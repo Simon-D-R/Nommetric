@@ -13,7 +13,11 @@ pub fn restaurant_slug(url: &Url) -> Option<String> {
 	let _city = segs.next()?;
 	let _neighbourhood = segs.next()?;
 	let uname = segs.next()?;
-	Some(uname.to_ascii_lowercase())
+	Some(canonical_slug(uname))
+}
+
+pub fn canonical_slug(slug: &str) -> String {
+	slug.to_ascii_lowercase()
 }
 
 #[cfg(test)]

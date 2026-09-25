@@ -2,14 +2,12 @@
   "version": 1,
   "captured_at": "2026-08-28",
   "site": "deliveroo.be",
-  "_provenance": "phase_0 M1-M11; verified unchanged on three restaurants: de-kastart-bvba (60 items), panos-rail-gent-dampoort (75), bocca-gent (60). See NOTES.md.",
-
-  "card_census": "[id^='layout-'] > ul > li:has([data-testid='menu-item-image'])",
+  "card_census": "[data-menu-landmark='true'] [id^='layout-']:not(#layout-search-result) > ul > li:has([data-testid='menu-item-image'])",
   "card_mount": "[data-menu-landmark='true'] li:has([data-testid='menu-item-image'])",
+  "category_ancestor": "[id^='layout-']:not(#layout-search-result)",
   "name": ".notranslate p",
   "mount": null,
   "menu_container": "[data-menu-landmark='true']",
-
   "id_sources": [
     {
       "kind": "next-data",
