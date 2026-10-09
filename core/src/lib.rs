@@ -1,4 +1,5 @@
 pub mod census;
+pub mod edit;
 pub mod id_extraction;
 pub mod key;
 pub mod lookup_key;

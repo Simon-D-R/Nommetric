@@ -1,24 +1,50 @@
 use std::cell::OnceCell;
 use web_sys::{CssStyleSheet, ShadowRoot};
 
+const TOKENS_CSS: &str = include_str!("tokens.css");
 const BADGE_CSS: &str = include_str!("badge.css");
+const POPOVER_CSS: &str = include_str!("popover.css");
 
-thread_local! {
-	static SHEET: OnceCell<CssStyleSheet> = const { OnceCell::new() };
+struct StyleSheets {
+	tokens: CssStyleSheet,
+	badge: CssStyleSheet,
+	popover: CssStyleSheet,
 }
 
-pub fn adopt(root: &ShadowRoot) {
-	SHEET.with(|cell| {
-		let sheets = js_sys::Array::new();
-		sheets.push(cell.get_or_init(build_sheet));
-		root.set_adopted_style_sheets(&sheets);
+thread_local! {
+	static SHEETS: OnceCell<StyleSheets> = const { OnceCell::new() };
+}
+
+pub fn adopt_badge_sheets(root: &ShadowRoot) {
+	adopt(root, |sheets| [&sheets.tokens, &sheets.badge]);
+}
+
+pub fn adopt_popover_sheets(root: &ShadowRoot) {
+	adopt(root, |sheets| [&sheets.tokens, &sheets.popover]);
+}
+
+fn adopt(root: &ShadowRoot, pick: impl Fn(&StyleSheets) -> [&CssStyleSheet; 2]) {
+	SHEETS.with(|cell| {
+		let adopted = js_sys::Array::new();
+		for sheet in pick(cell.get_or_init(build_sheets)) {
+			adopted.push(sheet);
+		}
+		root.set_adopted_style_sheets(&adopted);
 	});
 }
 
-fn build_sheet() -> CssStyleSheet {
+fn build_sheets() -> StyleSheets {
+	StyleSheets {
+		tokens: build_sheet("tokens", TOKENS_CSS),
+		badge: build_sheet("badge", BADGE_CSS),
+		popover: build_sheet("popover", POPOVER_CSS),
+	}
+}
+
+fn build_sheet(sheet_name: &str, css: &str) -> CssStyleSheet {
 	let sheet = CssStyleSheet::new().expect("failed to create stylesheet");
-	if let Err(err) = sheet.replace_sync(BADGE_CSS) {
-		log::error!("badge stylesheet rejected: {:?}", err);
+	if let Err(err) = sheet.replace_sync(css) {
+		log::error!("{} stylesheet rejected: {:?}", sheet_name, err);
 	}
 	sheet
 }

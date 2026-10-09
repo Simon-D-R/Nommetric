@@ -1,0 +1,28 @@
+:host {
+	--nm-rated: #f2b705;
+	--nm-on-rated: #1f2937;
+	--nm-muted: #6b7280;
+	--nm-line: #d1d5db;
+	--nm-surface: #ffffff;
+	--nm-text: #111827;
+}
+
+:host([data-nm-theme='dark']) {
+	--nm-rated: #f7c948;
+	--nm-on-rated: #111827;
+	--nm-muted: #9ca3af;
+	--nm-line: #4b5563;
+	--nm-surface: #1f2937;
+	--nm-text: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+	:host(:not([data-nm-theme])) {
+		--nm-rated: #f7c948;
+		--nm-on-rated: #111827;
+		--nm-muted: #9ca3af;
+		--nm-line: #4b5563;
+		--nm-surface: #1f2937;
+		--nm-text: #f9fafb;
+	}
+}

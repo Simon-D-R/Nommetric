@@ -193,7 +193,7 @@ mod tests {
 	use crate::rating::{Rating, SCHEMA_VERSION};
 
 	const SLUG: &str = "de-kastart-bvba";
-	const CATEGORY: &str = "133151720";
+	const CATEGORY: &str = "layout-133151720";
 
 	fn dummy_rating(dish_name: &str, score: Option<u8>, comment: &str, stamped_ms: f64) -> Rating {
 		Rating {
@@ -255,11 +255,11 @@ mod tests {
 			"",
 			"lasagne",
 			"r:de-kastart-bvba",
-			"r:de-kastart-bvba:i:133151720",
-			"r:de-kastart-bvba:i:133151720:",
-			"r:de-kastart-bvba:x:133151720:lasagne",
-			"r::i:133151720:997582203",
-			"x:de-kastart-bvba:i:133151720:997582203",
+			"r:de-kastart-bvba:i:layout-133151720",
+			"r:de-kastart-bvba:i:layout-133151720:",
+			"r:de-kastart-bvba:x:layout-133151720:lasagne",
+			"r::i:layout-133151720:997582203",
+			"x:de-kastart-bvba:i:layout-133151720:997582203",
 		] {
 			assert_eq!(ItemKey::decode(key), None, "{key}");
 		}

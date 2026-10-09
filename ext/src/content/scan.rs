@@ -1,10 +1,12 @@
 use crate::content::badge::{BadgeMount, BadgeState, CARD_ATTRIBUTE, ReadOnlyReason};
 use crate::site::deliveroo::{CardScope, DeliverooMenu};
 use crate::store::StoredRestaurantRatings;
+use crate::ui::popover;
 use nommetric_core::census::DishCensus;
 use nommetric_core::key::{ItemIdentity, ItemKey};
 use nommetric_core::lookup_key::dish_name_to_lookup_key;
 use std::cell::{Cell, RefCell};
+use std::collections::HashSet;
 use web_sys::{Document, Element};
 
 thread_local! {
@@ -23,6 +25,7 @@ pub struct MenuScan {
 	mounts: Vec<BadgeMount>,
 	restaurant_slug: String,
 	timed: bool,
+	warned_orphaned_keys: HashSet<String>,
 }
 
 #[derive(Default)]
@@ -77,6 +80,7 @@ impl MenuScan {
 			mounts: Vec::new(),
 			restaurant_slug,
 			timed: false,
+			warned_orphaned_keys: HashSet::new(),
 		}
 	}
 
@@ -100,6 +104,9 @@ impl MenuScan {
 			mount.set_theme(&theme);
 		}
 		self.repaint_matching(|identity| newly_unseparable.contains(&identity.dish_lookup_key));
+		if report.mounted_new > 0 {
+			self.warn_about_orphaned_ratings();
+		}
 
 		report.mounted_total = self.mounts.len();
 		if !self.timed {
@@ -107,6 +114,38 @@ impl MenuScan {
 			log::debug!("scan took {:.0} ms", js_sys::Date::now() - started_ms);
 		}
 		report
+	}
+
+	fn warn_about_orphaned_ratings(&mut self) {
+		let resolved_keys: HashSet<String> = self
+			.mounts
+			.iter()
+			.filter_map(|mount| self.store.get(mount.identity()))
+			.map(|(key, _)| key.encode())
+			.collect();
+
+		for (stored_key, record) in self.store.records() {
+			if let Some(item_id) = &record.item_id
+				&& !resolved_keys.contains(stored_key)
+				&& !self.warned_orphaned_keys.contains(stored_key)
+				&& let Some(moved) = self
+					.mounts
+					.iter()
+					.map(BadgeMount::identity)
+					.find(|identity| {
+						identity.item_id.as_ref() == Some(item_id)
+							&& identity.category_id != record.category_id
+					}) {
+				log::warn!(
+					"rating for {:?} ({}) is stored under {}, the dish now renders in {}: orphaned",
+					record.dish_name,
+					item_id,
+					record.category_id,
+					moved.category_id
+				);
+				self.warned_orphaned_keys.insert(stored_key.clone());
+			}
+		}
 	}
 
 	fn census_pass(&self, document: &Document, report: &mut ScanReport) -> Vec<CensusCard> {
@@ -200,7 +239,13 @@ impl MenuScan {
 			match self.menu.mount_point(&card) {
 				None => log::warn!("card {} has no mount point", index),
 				Some(mount_point) => {
-					match BadgeMount::attach(&card, &mount_point, identity, &state) {
+					match BadgeMount::attach(
+						&card,
+						&mount_point,
+						identity,
+						&self.restaurant_slug,
+						&state,
+					) {
 						Some(mount) => {
 							self.mounts.push(mount);
 							report.mounted_new += 1;
@@ -237,11 +282,7 @@ impl MenuScan {
 	}
 
 	async fn resolve(&mut self, identity: &ItemIdentity, report: &mut ScanReport) -> BadgeState {
-		let read_from_name_key = matches!(
-			self.store.get(identity),
-			Some((ItemKey::Name { .. }, _record))
-		);
-		if read_from_name_key && identity.item_id.is_some() {
+		if identity.item_id.is_some() {
 			match self.store.promote(identity).await {
 				Ok(Some(_)) => report.promoted += 1,
 				Ok(None) => {}
@@ -264,9 +305,9 @@ impl MenuScan {
 			};
 		}
 		match self.store.get(identity) {
-			Some((_key, record)) => BadgeState::Rated {
-				score: record.score,
-				comment: record.comment.clone(),
+			Some((key, record)) => BadgeState::Rated {
+				key,
+				record: Box::new(record.clone()),
 			},
 			None => BadgeState::Unrated,
 		}
@@ -306,6 +347,7 @@ pub fn install(scan: MenuScan) {
 }
 
 pub fn reset() {
+	popover::close_editor(false);
 	INSTALLED_RESTAURANT.with_borrow_mut(|slug| *slug = None);
 	SCAN.with_borrow_mut(|slot| {
 		if let Some(mut scan) = slot.take() {

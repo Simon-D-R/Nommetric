@@ -86,10 +86,7 @@ impl DeliverooMenu {
 	}
 
 	pub fn declared_theme(&self, document: &Document) -> String {
-		document
-			.body()
-			.and_then(|body| body.get_attribute(THEME_ATTRIBUTE))
-			.unwrap_or_else(|| DEFAULT_THEME.to_string())
+		declared_theme(document)
 	}
 
 	pub fn mount_point(&self, card: &Element) -> Option<HtmlElement> {
@@ -120,6 +117,13 @@ impl DeliverooMenu {
 			})
 			.collect()
 	}
+}
+
+pub fn declared_theme(document: &Document) -> String {
+	document
+		.body()
+		.and_then(|body| body.get_attribute(THEME_ATTRIBUTE))
+		.unwrap_or_else(|| DEFAULT_THEME.to_string())
 }
 
 pub async fn load_selectors(runtime: &impl BrowserRuntime, window: &Window) -> Option<Selector> {

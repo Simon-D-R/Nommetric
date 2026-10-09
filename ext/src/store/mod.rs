@@ -1,8 +1,9 @@
 //! Storage of Ratings in browser local storage.
 
 use crate::browser::{BrowserStorage, BrowserStorageError, PlatformStorage};
+use nommetric_core::edit::EditWrite;
 use nommetric_core::key::{ItemIdentity, ItemKey};
-use nommetric_core::rating::{RATING_SCALE, Rating};
+use nommetric_core::rating::Rating;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -32,6 +33,23 @@ pub enum ChangeResult {
 	Removed,
 	Ignored,
 	Unreadable,
+}
+
+/// Bypass cache (catches up with onChanged).
+pub async fn write_edit(
+	storage: &impl BrowserStorage,
+	write: &EditWrite,
+) -> Result<(), StoreError> {
+	if let Some((key, record)) = &write.upsert {
+		let value =
+			serde_json::to_value(record).map_err(|err| StoreError::Json(err.to_string()))?;
+		storage.insert(&key.encode(), &value).await?;
+	}
+	if !write.remove.is_empty() {
+		let stored_keys: Vec<String> = write.remove.iter().map(ItemKey::encode).collect();
+		storage.remove(&stored_keys).await?;
+	}
+	Ok(())
 }
 
 impl<Storage: BrowserStorage> StoredRestaurantRatings<Storage> {

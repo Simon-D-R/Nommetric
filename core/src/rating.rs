@@ -69,7 +69,7 @@ mod tests {
 			dish_name: "Lasagne".to_string(),
 			dish_lookup_key: "lasagne".to_string(),
 			item_id: Some("997582203".to_string()),
-			category_id: "133151720".to_string(),
+			category_id: "layout-133151720".to_string(),
 			restaurant_slug: "de-kastart-bvba".to_string(),
 			created_at_ms: 1_787_839_453_000.0,
 			updated_at_ms: 1_787_839_453_000.0,

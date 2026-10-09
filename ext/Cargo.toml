@@ -21,6 +21,8 @@ log = "0.4"
 web-extensions-sys = "0.4.2"
 gloo-utils = { version = "0.3", features = ["serde"] }
 gloo-timers = "0.3"
+gloo-events = "0.3"
+leptos = { version = "=0.8.21", features = ["csr"] }
 
 [dependencies.web-sys]
 version = "0.3.104"
@@ -30,10 +32,13 @@ features = [
 	"CssStyleSheet",
 	"Document",
 	"DocumentFragment",
+	"DomRect",
 	"Element",
 	"Event",
 	"EventTarget",
+	"FocusOptions",
 	"HtmlElement",
+	"KeyboardEvent",
 	"Location",
 	"MutationObserver",
 	"MutationObserverInit",
@@ -46,5 +51,5 @@ features = [
 	"ShadowRoot",
 	"ShadowRootInit",
 	"ShadowRootMode",
-	"Window"
+	"Window",
 ]
