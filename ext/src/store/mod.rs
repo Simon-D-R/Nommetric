@@ -10,7 +10,6 @@ use std::collections::HashMap;
 pub enum StoreError {
 	Storage(BrowserStorageError),
 	Json(String),
-	ScoreOutOfRange(u8),
 	Unreadable(String),
 }
 
@@ -96,16 +95,8 @@ impl<Storage: BrowserStorage> StoredRestaurantRatings<Storage> {
 		self.records.len()
 	}
 
-	pub fn is_empty(&self) -> bool {
-		self.records.is_empty()
-	}
-
 	pub fn records(&self) -> &HashMap<String, Rating> {
 		&self.records
-	}
-
-	pub fn unreadable(&self) -> &HashMap<String, serde_json::Value> {
-		&self.unreadable
 	}
 
 	pub fn get(&self, identity: &ItemIdentity) -> Option<(ItemKey, &Rating)> {
@@ -116,44 +107,6 @@ impl<Storage: BrowserStorage> StoredRestaurantRatings<Storage> {
 		identity
 			.candidate_keys(&self.restaurant_slug)
 			.any(|candidate| self.unreadable.contains_key(&candidate.encode()))
-	}
-
-	pub async fn put(&mut self, key: &ItemKey, record: Rating) -> Result<(), StoreError> {
-		let stored_key = key.encode();
-		if self.unreadable.contains_key(&stored_key) {
-			return Err(StoreError::Unreadable(stored_key));
-		}
-		if let Some(score) = record.score
-			&& !RATING_SCALE.contains(score)
-		{
-			return Err(StoreError::ScoreOutOfRange(score));
-		}
-
-		if record.is_empty() {
-			self.remove_through(stored_key).await
-		} else {
-			self.write_through(stored_key, record).await
-		}
-	}
-
-	async fn write_through(
-		&mut self,
-		stored_key: String,
-		record: Rating,
-	) -> Result<(), StoreError> {
-		let value =
-			serde_json::to_value(&record).map_err(|err| StoreError::Json(err.to_string()))?;
-		self.storage.insert(&stored_key, &value).await?;
-		self.records.insert(stored_key, record);
-		Ok(())
-	}
-
-	async fn remove_through(&mut self, stored_key: String) -> Result<(), StoreError> {
-		self.storage
-			.remove(std::slice::from_ref(&stored_key))
-			.await?;
-		self.records.remove(&stored_key);
-		Ok(())
 	}
 
 	pub async fn promote(
@@ -175,8 +128,13 @@ impl<Storage: BrowserStorage> StoredRestaurantRatings<Storage> {
 					return Err(StoreError::Unreadable(to_key));
 				}
 
-				self.write_through(to_key, merge.record).await?;
-				self.remove_through(from_key).await?;
+				let value = serde_json::to_value(&merge.record)
+					.map_err(|err| StoreError::Json(err.to_string()))?;
+				self.storage.insert(&to_key, &value).await?;
+				self.records.insert(to_key, merge.record);
+
+				self.storage.remove(std::slice::from_ref(&from_key)).await?;
+				self.records.remove(&from_key);
 
 				Ok(Some(merge.to))
 			} else {

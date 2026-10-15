@@ -6,6 +6,9 @@ edition = "2024"
 [lib]
 crate-type = ["cdylib"]
 
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Oz", "--enable-bulk-memory"]
+
 [features]
 firefox = []
 
@@ -28,6 +31,7 @@ leptos = { version = "=0.8.21", features = ["csr"] }
 version = "0.3.104"
 features = [
 	"console",
+	"Blob",
 	"CssStyleDeclaration",
 	"CssStyleSheet",
 	"Document",
@@ -36,8 +40,12 @@ features = [
 	"Element",
 	"Event",
 	"EventTarget",
+	"File",
+	"FileList",
 	"FocusOptions",
+	"HtmlAnchorElement",
 	"HtmlElement",
+	"HtmlInputElement",
 	"KeyboardEvent",
 	"Location",
 	"MutationObserver",

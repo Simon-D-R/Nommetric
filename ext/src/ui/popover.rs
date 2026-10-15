@@ -1,6 +1,6 @@
 //! The one score and comment editor, anchored to whichever badge opened it.
 
-use crate::browser::{BrowserStorageError, PlatformStorage};
+use crate::browser::PlatformStorage;
 use crate::site::deliveroo::declared_theme;
 use crate::store::{StoreError, write_edit};
 use crate::ui::anchor::{PlacementSide, PopoverSize, Rect, ViewportSize, place_popover};
@@ -344,13 +344,8 @@ fn EditorForm(session: EditorSession) -> impl IntoView {
 							Err(err) => {
 								saving.set(false);
 								let reason = match err {
-									StoreError::Storage(
-										BrowserStorageError::ContextInvalidated,
-									) => "the extension was reloaded; reload the page to save"
-										.to_string(),
-									StoreError::Storage(BrowserStorageError::Browser(message))
-									| StoreError::Storage(BrowserStorageError::Json(message))
-									| StoreError::Json(message) => message,
+									StoreError::Storage(storage_error) => storage_error.to_string(),
+									StoreError::Json(message) => message,
 									other => format!("{other:?}"),
 								};
 								status.set(format!("Couldn't save: {reason}"));

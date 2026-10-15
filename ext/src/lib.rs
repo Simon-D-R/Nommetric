@@ -2,8 +2,6 @@ mod browser;
 #[cfg(not(feature = "firefox"))]
 mod chromium;
 mod content;
-// TEMPORARY: delete along with ext/src/harness.rs when ui/options.rs lands.
-mod harness;
 mod logging;
 mod site;
 mod store;
@@ -93,7 +91,5 @@ async fn start_menu(restaurant_slug: String) -> Option<web_sys::Node> {
 pub fn start_options() {
 	console_error_panic_hook::set_once();
 	logging::init();
-	log::info!("start_options ok");
-
-	harness::watch_and_run();
+	leptos::mount::mount_to_body(ui::options::OptionsPage);
 }

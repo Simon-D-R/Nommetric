@@ -1,18 +1,5 @@
 <!doctype html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nommetric options</title>
-<h1>Nommetric</h1>
-<p>Stub. Open the console.</p>
-<p>
-	On load this runs a store harness against the reserved restaurant
-	<code>__harness__</code>: nine steps covering load, an id-keyed write, a name-keyed
-	write, resolution, the name&nbsp;&rarr;&nbsp;id promotion, its no-op re-run, and the
-	empty-record removal. It cleans up after itself.
-</p>
-<p>
-	Also available in the console: <code>dump_all()</code> prints every stored key,
-	<code>run_harness(true)</code> re-runs the sequence but stops before the cleanup so a
-	second tab can observe the record via <code>onChanged</code>, and
-	<code>wipe_harness()</code> removes the <code>__harness__</code> keys.
-</p>
 <script type="module" src="options.js"></script>

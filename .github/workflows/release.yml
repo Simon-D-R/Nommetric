@@ -1,0 +1,28 @@
+name: Release
+on:
+  release:
+    types: [published]
+permissions:
+  contents: write
+jobs:
+  extension-zip:
+    runs-on: ubuntu-latest
+    container: rust:1.98-trixie
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      ZIP: nommetric-${{ github.event.release.tag_name }}.zip
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          MANIFEST=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' extension/manifest.json)
+          [ "${TAG#v}" = "$MANIFEST" ] || { echo "tag $TAG != manifest.json version $MANIFEST" >&2; exit 1; }
+      - run: apt-get update && apt-get install -y zip gh
+      - run: rustup toolchain install
+      - run: cargo install wasm-pack --locked
+      - run: cargo test
+      - run: ./build.sh --release
+      - run: cd extension && zip -r "$ZIP" . -x 'pkg/.gitignore' && cd .. && mv "extension/$ZIP" ./
+      - run: gh release upload "$TAG" "$ZIP" --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}

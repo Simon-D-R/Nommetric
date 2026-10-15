@@ -23,12 +23,6 @@
 	outline-offset: 2px;
 }
 
-.rated {
-	background: var(--nm-rated);
-	color: var(--nm-on-rated);
-	border-color: var(--nm-rated);
-}
-
 .unrated {
 	background: transparent;
 	color: var(--nm-muted);
@@ -39,6 +33,11 @@
 .unrated:hover,
 .unrated:focus-visible {
 	opacity: 1;
+}
+
+/* Chromium only; elsewhere the badge keeps its own hover. */
+:host-context([data-nommetric]:hover) .unrated {
+  opacity: 1;
 }
 
 .read-only {

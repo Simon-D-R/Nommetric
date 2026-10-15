@@ -1,0 +1,23 @@
+.score-low {
+	background: var(--nm-score-low);
+	color: var(--nm-on-score-low);
+	border-color: var(--nm-score-low);
+}
+
+.score-mid {
+	background: var(--nm-score-mid);
+	color: var(--nm-on-score-mid);
+	border-color: var(--nm-score-mid);
+}
+
+.score-high {
+	background: var(--nm-score-high);
+	color: var(--nm-on-score-high);
+	border-color: var(--nm-score-high);
+}
+
+.commented {
+	background: var(--nm-surface);
+	color: var(--nm-text);
+	border-color: var(--nm-line);
+}

@@ -85,6 +85,29 @@ impl ItemKey {
 	pub fn restaurant_prefix(restaurant_slug: &str) -> String {
 		format!("r:{restaurant_slug}:")
 	}
+
+	pub fn matches_record(&self, record: &Rating) -> bool {
+		match self {
+			ItemKey::Id {
+				restaurant_slug,
+				category_id,
+				item_id,
+			} => {
+				*restaurant_slug == record.restaurant_slug
+					&& *category_id == record.category_id
+					&& record.item_id.as_ref() == Some(item_id)
+			}
+			ItemKey::Name {
+				restaurant_slug,
+				category_id,
+				dish_lookup_key,
+			} => {
+				*restaurant_slug == record.restaurant_slug
+					&& *category_id == record.category_id
+					&& *dish_lookup_key == record.dish_lookup_key
+			}
+		}
+	}
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -147,42 +170,17 @@ impl ItemIdentity {
 		}
 		let to = self.id_key(restaurant_slug)?;
 
-		let record = match id_record {
-			None => Rating {
-				item_id: self.item_id.clone(),
-				category_id: self.category_id.clone(),
-				..name_record.clone()
-			},
-			Some(id_record) => {
-				let (newer, older) = if id_record.updated_at_ms >= name_record.updated_at_ms {
-					(id_record, name_record)
-				} else {
-					(name_record, id_record)
-				};
-				Rating {
-					score: newer.score.or(older.score),
-					comment: merge_comments(&newer.comment, &older.comment),
-					item_id: self.item_id.clone(),
-					category_id: self.category_id.clone(),
-					created_at_ms: newer.created_at_ms.min(older.created_at_ms),
-					..newer.clone()
-				}
-			}
+		let merged = match id_record {
+			None => name_record.clone(),
+			Some(id_record) => id_record.merged_with(name_record),
+		};
+		let record = Rating {
+			item_id: self.item_id.clone(),
+			category_id: self.category_id.clone(),
+			..merged
 		};
 
 		Some(Merge { to, record })
-	}
-}
-
-fn merge_comments(newer: &str, older: &str) -> String {
-	let new_trimmed = newer.trim();
-	let old_trimmed = older.trim();
-	match (new_trimmed.is_empty(), old_trimmed.is_empty()) {
-		(true, true) => String::new(),
-		(false, true) => new_trimmed.to_string(),
-		(true, false) => old_trimmed.to_string(),
-		(false, false) if new_trimmed == old_trimmed => new_trimmed.to_string(),
-		(false, false) => format!("{}\n---\n{}", new_trimmed, old_trimmed),
 	}
 }
 

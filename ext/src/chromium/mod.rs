@@ -3,6 +3,7 @@
 use crate::browser::{BrowserRuntime, BrowserStorage, BrowserStorageError, js_error_message};
 use gloo_utils::format::JsValueSerdeExt;
 use std::cell::Cell;
+use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
 
 #[derive(Default)]
@@ -18,17 +19,15 @@ impl BrowserStorage for ChromiumStorage {
 		value_from_js(&stored)
 	}
 
-	async fn insert(
+	async fn insert_many(
 		&self,
-		stored_key: &str,
-		value: &serde_json::Value,
+		values: &BTreeMap<String, serde_json::Value>,
 	) -> Result<(), BrowserStorageError> {
 		still_connected()?;
-		let items = js_sys::Object::new();
-		js_sys::Reflect::set(&items, &JsValue::from_str(stored_key), &value_to_js(value)?)
-			.expect("a fresh object accepts a property"); // Only fails on exotic targets.
+		let items = JsValue::from_serde(values)
+			.map_err(|err| BrowserStorageError::Json(err.to_string()))?;
 		local_storage()
-			.set(items.as_ref())
+			.set(items.unchecked_ref())
 			.await
 			.map_err(classify_error)?;
 		Ok(())
@@ -111,10 +110,6 @@ fn classify_error(thrown: JsValue) -> BrowserStorageError {
 		return BrowserStorageError::ContextInvalidated;
 	}
 	BrowserStorageError::Browser(message)
-}
-
-fn value_to_js(value: &serde_json::Value) -> Result<JsValue, BrowserStorageError> {
-	JsValue::from_serde(value).map_err(|err| BrowserStorageError::Json(err.to_string()))
 }
 
 fn value_from_js(value: &JsValue) -> Result<serde_json::Value, BrowserStorageError> {

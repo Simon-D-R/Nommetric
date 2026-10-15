@@ -1,3 +1,4 @@
+pub mod backup;
 pub mod census;
 pub mod edit;
 pub mod id_extraction;

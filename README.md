@@ -24,3 +24,9 @@ Then in a Chromium-based browser, turn on Developer mode, and load the extension
 ```sh
 cargo watch -s ./build.sh
 ```
+
+## Back up
+
+**Uninstalling the extension deletes every rating**, so to keep your ratings, use the options page (right-click the extension icon -> Options) to export them to a file.
+
+Import adds and merges, it never deletes a rating.

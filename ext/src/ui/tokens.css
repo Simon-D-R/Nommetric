@@ -1,28 +1,49 @@
-:host {
+:host,
+:root {
 	--nm-rated: #f2b705;
 	--nm-on-rated: #1f2937;
 	--nm-muted: #6b7280;
 	--nm-line: #d1d5db;
 	--nm-surface: #ffffff;
 	--nm-text: #111827;
+	--nm-score-low: #dc2626;
+	--nm-on-score-low: #ffffff;
+	--nm-score-mid: #f59e0b;
+	--nm-on-score-mid: #1f2937;
+	--nm-score-high: #15803d;
+	--nm-on-score-high: #ffffff;
 }
 
-:host([data-nm-theme='dark']) {
+:host([data-nm-theme='dark']),
+:root[data-nm-theme='dark'] {
 	--nm-rated: #f7c948;
 	--nm-on-rated: #111827;
 	--nm-muted: #9ca3af;
 	--nm-line: #4b5563;
 	--nm-surface: #1f2937;
 	--nm-text: #f9fafb;
+	--nm-score-low: #f87171;
+	--nm-on-score-low: #111827;
+	--nm-score-mid: #fbbf24;
+	--nm-on-score-mid: #111827;
+	--nm-score-high: #4ade80;
+	--nm-on-score-high: #111827;
 }
 
 @media (prefers-color-scheme: dark) {
-	:host(:not([data-nm-theme])) {
+	:host(:not([data-nm-theme])),
+	:root:not([data-nm-theme]) {
 		--nm-rated: #f7c948;
 		--nm-on-rated: #111827;
 		--nm-muted: #9ca3af;
 		--nm-line: #4b5563;
 		--nm-surface: #1f2937;
 		--nm-text: #f9fafb;
+		--nm-score-low: #f87171;
+		--nm-on-score-low: #111827;
+		--nm-score-mid: #fbbf24;
+		--nm-on-score-mid: #111827;
+		--nm-score-high: #4ade80;
+		--nm-on-score-high: #111827;
 	}
 }

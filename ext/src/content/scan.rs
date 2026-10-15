@@ -24,7 +24,6 @@ pub struct MenuScan {
 	store: StoredRestaurantRatings,
 	mounts: Vec<BadgeMount>,
 	restaurant_slug: String,
-	timed: bool,
 	warned_orphaned_keys: HashSet<String>,
 }
 
@@ -40,13 +39,14 @@ pub struct ScanReport {
 	name_keyed: usize,
 	read_only: usize,
 	promoted: usize,
+	scan_ms: f64,
 }
 
 impl std::fmt::Display for ScanReport {
 	fn fmt(&self, out: &mut std::fmt::Formatter) -> std::fmt::Result {
 		write!(
 			out,
-			"census_cards: {}\n census_skipped: {}\n mount_cards: {}\n mounted_total: {}\n mounted_new: {}\n unmountable_cards: {}\n with_item_id: {}\n name_keyed: {}\n read_only: {}\n promoted: {}",
+			"census_cards: {}\n census_skipped: {}\n mount_cards: {}\n mounted_total: {}\n mounted_new: {}\n unmountable_cards: {}\n with_item_id: {}\n name_keyed: {}\n read_only: {}\n promoted: {}\n scan_ms: {:.0}",
 			self.census_cards,
 			self.census_skipped,
 			self.mount_cards,
@@ -56,7 +56,8 @@ impl std::fmt::Display for ScanReport {
 			self.with_item_id,
 			self.name_keyed,
 			self.read_only,
-			self.promoted
+			self.promoted,
+			self.scan_ms
 		)
 	}
 }
@@ -79,7 +80,6 @@ impl MenuScan {
 			store,
 			mounts: Vec::new(),
 			restaurant_slug,
-			timed: false,
 			warned_orphaned_keys: HashSet::new(),
 		}
 	}
@@ -109,10 +109,7 @@ impl MenuScan {
 		}
 
 		report.mounted_total = self.mounts.len();
-		if !self.timed {
-			self.timed = true;
-			log::debug!("scan took {:.0} ms", js_sys::Date::now() - started_ms);
-		}
+		report.scan_ms = js_sys::Date::now() - started_ms;
 		report
 	}
 

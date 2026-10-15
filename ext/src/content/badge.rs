@@ -1,5 +1,5 @@
 use crate::ui::popover::{self, EditorSession};
-use crate::ui::{create_element, tokens};
+use crate::ui::{create_element, score_band_class, tokens};
 use gloo_events::{EventListener, EventListenerOptions};
 use nommetric_core::key::{ItemIdentity, ItemKey};
 use nommetric_core::rating::Rating;
@@ -172,12 +172,12 @@ fn describe(state: &BadgeState) -> (&'static str, String, String) {
 		BadgeState::Rated{record, ..} => {
 			match **record {
 				Rating { score: Some(score), ..} => (
-					"rated",
+					score_band_class(score),
 					score.to_string(),
 					format!("Your score: {}, edit", score),
 				),
 				_ => (// A cleared score can leave a surviving comment
-					"rated",
+					"commented",
 					"·".to_string(),
 					"Commented, no score, edit".to_string(),
 				)

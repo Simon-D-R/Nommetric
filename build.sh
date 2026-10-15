@@ -17,7 +17,6 @@ wasm-pack build ext $MODE \
 	--out-dir ../extension/pkg \
 	--out-name nommetric \
 	--no-typescript \
-	--no-pack \
-	--no-opt
+	--no-pack
 
 echo "built $(du -h extension/pkg/nommetric_bg.wasm | cut -f1)  (${MODE#--})"

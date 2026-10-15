@@ -1,8 +1,9 @@
 use std::cell::OnceCell;
 use web_sys::{CssStyleSheet, ShadowRoot};
 
-const TOKENS_CSS: &str = include_str!("tokens.css");
-const BADGE_CSS: &str = include_str!("badge.css");
+pub const TOKENS_CSS: &str = include_str!("tokens.css");
+pub const SCORE_CSS: &str = include_str!("score.css");
+const BADGE_CSS: &str = concat!(include_str!("badge.css"), include_str!("score.css"));
 const POPOVER_CSS: &str = include_str!("popover.css");
 
 struct StyleSheets {
