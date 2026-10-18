@@ -23,7 +23,6 @@ pub struct MenuScan {
 	mounts: Vec<BadgeMount>,
 	restaurant_slug: String,
 	timed: bool,
-	warned_no_cards: bool,
 }
 
 #[derive(Default)]
@@ -78,7 +77,6 @@ impl MenuScan {
 			mounts: Vec::new(),
 			restaurant_slug,
 			timed: false,
-			warned_no_cards: false,
 		}
 	}
 
